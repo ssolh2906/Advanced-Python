@@ -523,3 +523,4 @@ fabric.properties
 
 !/01_parsing/ExBeautifulSoup.py
 !/01_parsing/Ex_Regex.py
+!/02_comprehension/Ex_Comprehensions.py
