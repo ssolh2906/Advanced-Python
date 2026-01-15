@@ -36,24 +36,30 @@ class ReParser():
 
         table_pattern = r'<table.*?>.*?</table>'
         table_matches = re.findall(table_pattern, self.raw_data, re.DOTALL)
-        for tb_idx, match in enumerate(table_matches, start=1):
+        for tb_idx, match in enumerate(table_matches):
             # Add table match to result dict
             self.result[f"table_{tb_idx}"] = match
             # Search inside table
 
             header_pattern = r'<thead>(.*?)</thead>'
             h_matches = re.findall(header_pattern, match, re.DOTALL)
-            for h_idx, h_match in enumerate(h_matches, start=1):
+            for h_idx, h_match in enumerate(h_matches):
                 self.result[f"thead_{tb_idx}_{h_idx}"] = h_match.strip()
+                th_pattern = r'<th.*?>(.*?)</th>'
+                th_matches = re.findall(th_pattern, h_match, re.DOTALL)
+                for th_idx, th_match in enumerate(th_matches):
+                    self.result[f"th_{tb_idx}_{h_idx}_{th_idx}"] = th_match.strip()
+
 
             body_pattern = r'<tbody.*?>(.*?)</tbody>'
             b_matches = re.findall(body_pattern, match, re.DOTALL)
-            for b_idx, b_match in enumerate(b_matches, start=1):
+            for b_idx, b_match in enumerate(b_matches):
                 self.result[f"tbody_{tb_idx}_{b_idx}"] = b_match.strip()
+                tr_pattern = r'<tr.*?>(.*?)</tr>'
 
             foot_pattern = r'<tfoot.*?>(.*?)</tfoot>'
             f_matches = re.findall(foot_pattern, match, re.DOTALL)
-            for f_idx, f_match in enumerate(f_matches, start=1):
+            for f_idx, f_match in enumerate(f_matches):
                 self.result[f"tfoot_{tb_idx}_{f_idx}"] = f_match.strip()
 
         return self.result
@@ -70,6 +76,7 @@ if __name__ == '__main__':
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
     print(re_result.keys())
+    #print(re_result['thead_1_1'])
 
 
     # Save raw_data to a file next to this script
