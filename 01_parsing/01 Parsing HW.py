@@ -1,9 +1,10 @@
-from collections import defaultdict
-from Colors import Color as C
-from bs4 import BeautifulSoup
 import re
+from collections import defaultdict
+
 import requests
-import os
+from bs4 import BeautifulSoup
+
+from Colors import Color as C
 
 
 def fetch_url(url):
@@ -11,18 +12,6 @@ def fetch_url(url):
     response = requests.get(url, headers=headers)
     html_text = response.text
     return html_text
-
-
-def mock_fetch_url(url):
-    # Load raw_data from a file next to this script
-    try:
-        save_path = os.path.join(os.path.dirname(__file__), 'raw_data.html')
-        with open(save_path, 'r', encoding='utf-8') as f:
-            html_text = f.read()
-        return html_text
-    except Exception as e:
-        print(f"Failed to load raw_data: {e}")
-        return ""
 
 
 class ReParser():
@@ -105,9 +94,7 @@ def printHeader(funcname, *parameters):
         print(f'{C.yellow}parameter: {item}')
 
 
-def test_re_parser():
-    raw_data = mock_fetch_url(pop_url)
-
+def test_re_parser(raw_data):
     parser = ReParser(raw_data)
     result = parser.parse()
 
@@ -120,9 +107,7 @@ def test_re_parser():
     print(f'{C.green}{result["td_0_3_2"]}')
 
 
-def test_bs_parser():
-    raw_data = mock_fetch_url(pop_url)
-
+def test_bs_parser(raw_data):
     parser = Bs4Parser(raw_data)
     result = parser.parse()
 
@@ -145,5 +130,5 @@ if __name__ == '__main__':
     bs_parser = Bs4Parser(raw_data)
     bs_result = bs_parser.parse()
 
-    test_re_parser()
-    test_bs_parser()
+    test_re_parser(raw_data)
+    test_bs_parser(raw_data)
