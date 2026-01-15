@@ -1,10 +1,9 @@
+from collections import defaultdict
+from Colors import Color as C
+from bs4 import BeautifulSoup
 import re
 import requests
 import os
-
-from collections import defaultdict
-
-from bs4 import BeautifulSoup
 
 
 def fetch_url(url):
@@ -99,18 +98,50 @@ class Bs4Parser:
 
         return self.result
 
+def printHeader(funcname, *parameters):
+    print(f'\n{C.white}function: {funcname}')
+    for item in parameters:
+        print(f'{C.yellow}parameter: {item}')
+
+
+def test_re_parser():
+    raw_data = mock_fetch_url(pop_url)
+
+    parser = ReParser(raw_data)
+    result = parser.parse()
+
+    printHeader("ReParser.parse")
+    print(f'{C.yellow}First 5 keys:')
+    print(f'{C.green}{list(result.keys())[:5]}')
+    print(f'{C.yellow}Last 5 keys:')
+    print(f'{C.green}{list(result.keys())[-5:]}')
+    print(f'{C.yellow}Table 0, Row 3, Cell 2:')
+    print(f'{C.green}{result["td_0_3_2"]}')
+
+def test_bs_parser():
+    raw_data = mock_fetch_url(pop_url)
+
+    parser = Bs4Parser(raw_data)
+    result = parser.parse()
+
+    printHeader("Bs4Parser.parse")
+    print(f'{C.yellow}First 5 keys:')
+    print(f'{C.green}{list(result.keys())[:5]}')
+    print(f'{C.yellow}Last 5 keys:')
+    print(f'{C.green}{list(result.keys())[-5:]}')
+    print(f'{C.yellow}Table 0, Row 3, Cell 2:')
+    print(f'{C.green}{result["td_0_3_2"]}')
+
 
 if __name__ == '__main__':
     pop_url = "https://www.worldometers.info/world-population/population-by-country/"
-    # raw_data = fetch_url(pop_url)
-    raw_data = mock_fetch_url(pop_url)
+    raw_data = fetch_url(pop_url)
 
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
-    print(re_result.keys())
-    print(re_result['td_0_12_3'])
 
     bs_parser = Bs4Parser(raw_data)
     bs_result = bs_parser.parse()
-    print(bs_result.keys())
-    print(bs_result['td_0_12_3'])
+
+    test_re_parser()
+    test_bs_parser()
