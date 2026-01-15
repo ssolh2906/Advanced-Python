@@ -51,10 +51,9 @@ class ReParser():
         formatted_tags = [rf'<{tag}.*?>.*?</{tag}>' for tag in tags]
         for ft in formatted_tags:
             parsed_tags = re.findall(ft, self.raw_data , re.DOTALL)
-
-        for i, p_tag in enumerate(parsed_tags, start=1):
-            key = self.find_key_for_tag(p_tag)
-            self.result[key] = p_tag
+            for i, p_tag in enumerate(parsed_tags, start=1):
+                key = self.find_key_for_tag(p_tag)
+                self.result[key] = p_tag
 
     def _parse_table_content(self):
         pass
