@@ -4,6 +4,8 @@ from collections import defaultdict
 import requests
 import os
 
+from bs4 import BeautifulSoup
+
 
 def fetch_url(url):
 
@@ -65,8 +67,36 @@ class ReParser():
                     self.result[f"{cell_tag}_{tb_idx}_{tr_idx}_{td_idx}"] = c_content.strip()
 
 class Bs4Parser:
-    pass
+    def __init__(self, raw_data = ""):
+        self.raw_data = raw_data
 
+        self.result = defaultdict(str)
+
+    def parse(self):
+        if not self.raw_data:
+            raise Exception("No data")
+        soup = BeautifulSoup(raw_data, "html.parser")
+
+        tables = soup.find_all('table')
+        for tb_idx, table in enumerate(tables):
+            self.result[f"table_{tb_idx}"] = str(table)
+
+            # Process thead, tbody, tfoot
+            for section_tag in ['thead', 'tbody', 'tfoot']:
+                section = table.find(section_tag)
+                if section:
+                    self.result[f"{section_tag}_{tb_idx}"] = str(section.text)
+
+                    # Find rows
+                    rows = section.find_all('tr')
+                    for tr_idx, row in enumerate(rows):
+                        self.result[f"tr_{tb_idx}_{tr_idx}"] = str(row.text)
+                        # Find cells
+                        cells = row.find_all(['th', 'td'])
+                        for td_idx, cell in enumerate(cells):
+                            self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text)
+
+        return self.result
 
 if __name__ == '__main__':
     pop_url = "https://www.worldometers.info/world-population/population-by-country/"
@@ -76,7 +106,12 @@ if __name__ == '__main__':
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
     print(re_result.keys())
-    print(re_result['th_0_0_1'])
+    print(re_result['td_0_12_3'])
+
+    bs_parser = Bs4Parser(raw_data)
+    bs_result = bs_parser.parse()
+    print(bs_result.keys())
+    print(bs_result['td_0_12_3'])
 
 
     # Save raw_data to a file next to this script
