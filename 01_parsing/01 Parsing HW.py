@@ -75,7 +75,10 @@ if __name__ == '__main__':
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
     print("ReParser Result:")
-    print(re_result.keys())  # Print first 500 characters of the first table
+    keys = list(re_result.keys())
+
+    for key in keys[3:7]:
+        print(re_result[key])
 
 
     # Save raw_data to a file next to this script
