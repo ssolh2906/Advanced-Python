@@ -1,3 +1,4 @@
+# Please run with Colors.py in the same directory
 import re
 from collections import defaultdict
 
@@ -132,3 +133,12 @@ if __name__ == '__main__':
 
     test_re_parser(raw_data)
     test_bs_parser(raw_data)
+
+    printHeader("Comparison")
+    print("RE and BS4 produce same results with given URL.")
+    print("However, the code is much shorter and clearer, using BS4.")
+    print("while inside of BS4 functions, has more thorough, exception handling logics.")
+    print("The parser using RE might not cover very wide range of situations. For example, malformed HTML.")
+    print("beautiful soup library is widely used and keeps updating to cover more edge cases.")
+    print("therefore, for more universal use, BS4 parser would be more stable and can cover more extraordinary situations.")
+    print("Also, since the code using BS4 is more readable and short, it will be easier to maintain.")
