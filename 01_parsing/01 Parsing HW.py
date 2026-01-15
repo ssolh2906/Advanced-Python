@@ -1,18 +1,18 @@
 import re
-from collections import defaultdict
-
 import requests
 import os
+
+from collections import defaultdict
 
 from bs4 import BeautifulSoup
 
 
 def fetch_url(url):
-
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(url, headers=headers)
     html_text = response.text
     return html_text
+
 
 def mock_fetch_url(url):
     # Load raw_data from a file next to this script
@@ -27,7 +27,7 @@ def mock_fetch_url(url):
 
 
 class ReParser():
-    def __init__(self, raw_data = ""):
+    def __init__(self, raw_data=""):
         self.raw_data = raw_data
 
         self.result = defaultdict(str)
@@ -66,8 +66,9 @@ class ReParser():
                 for td_idx, c_content in enumerate(cells):
                     self.result[f"{cell_tag}_{tb_idx}_{tr_idx}_{td_idx}"] = c_content.strip()
 
+
 class Bs4Parser:
-    def __init__(self, raw_data = ""):
+    def __init__(self, raw_data=""):
         self.raw_data = raw_data
 
         self.result = defaultdict(str)
@@ -98,6 +99,7 @@ class Bs4Parser:
 
         return self.result
 
+
 if __name__ == '__main__':
     pop_url = "https://www.worldometers.info/world-population/population-by-country/"
     # raw_data = fetch_url(pop_url)
@@ -112,22 +114,3 @@ if __name__ == '__main__':
     bs_result = bs_parser.parse()
     print(bs_result.keys())
     print(bs_result['td_0_12_3'])
-
-
-    # Save raw_data to a file next to this script
-    # try:
-    #     if not raw_data:
-    #         print("No raw_data returned from parse(); nothing to save.")
-    #     else:
-    #         save_path = os.path.join(os.path.dirname(__file__), 'raw_data.html')
-    #         with open(save_path, 'w', encoding='utf-8') as f:
-    #             f.write(raw_data)
-    #         print(f"Saved raw_data to: {save_path}")
-    # except Exception as e:
-    #     print(f"Failed to save raw_data: {e}")
-
-    # pop_re_parser = ReParser(raw_data)
-    # re_result = pop_re_parser.parse()
-    #
-    # pop_bs_parser = Bs4Parser(raw_data)
-    # bs_result = pop_bs_parser.parse()
