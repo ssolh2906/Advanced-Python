@@ -40,42 +40,9 @@ class ReParser():
             # Add table match to result dict
             self.result[f"table_{tb_idx}"] = match
             # Search inside table
-
-            header_pattern = r'<thead>(.*?)</thead>'
-            h_matches = re.findall(header_pattern, match, re.DOTALL)
-            for h_idx, h_match in enumerate(h_matches):
-                self.result[f"thead_{tb_idx}_{h_idx}"] = h_match.strip()
-                th_pattern = r'<th.*?>(.*?)</th>'
-                th_matches = re.findall(th_pattern, h_match, re.DOTALL)
-                for th_idx, th_match in enumerate(th_matches):
-                    self.result[f"th_{tb_idx}_{h_idx}_{th_idx}"] = th_match.strip()
-
-
-            body_pattern = r'<tbody.*?>(.*?)</tbody>'
-            b_matches = re.findall(body_pattern, match, re.DOTALL)
-            for b_idx, b_match in enumerate(b_matches):
-                self.result[f"tbody_{tb_idx}_{b_idx}"] = b_match.strip()
-                tr_pattern = r'<tr.*?>(.*?)</tr>'
-                tr_matches = re.findall(tr_pattern, b_match, re.DOTALL)
-                for tr_idx, tr_match in enumerate(tr_matches):
-                    self.result[f"tr_{tb_idx}_{tr_idx}"] = tr_match.strip()
-                    td_pattern = r'<td.*?>(.*?)</td>'
-                    td_matches = re.findall(td_pattern, tr_match, re.DOTALL)
-                    for td_idx, td_match in enumerate(td_matches):
-                        self.result[f"td_{tb_idx}_{tr_idx}_{td_idx}"] = td_match.strip()
-
-            foot_pattern = r'<tfoot.*?>(.*?)</tfoot>'
-            f_matches = re.findall(foot_pattern, match, re.DOTALL)
-            for f_idx, f_match in enumerate(f_matches):
-                self.result[f"tfoot_{tb_idx}_{f_idx}"] = f_match.strip()
-                tr_pattern = r'<tr.*?>(.*?)</tr>'
-                tr_matches = re.findall(tr_pattern, b_match, re.DOTALL)
-                for tr_idx, tr_match in enumerate(tr_matches):
-                    self.result[f"tr_{tb_idx}_{tr_idx}"] = tr_match.strip()
-                    td_pattern = r'<td.*?>(.*?)</td>'
-                    td_matches = re.findall(td_pattern, tr_match, re.DOTALL)
-                    for td_idx, td_match in enumerate(td_matches):
-                        self.result[f"td_{tb_idx}_{tr_idx}_{td_idx}"] = td_match.strip()
+            self._process_section(match, tb_idx, 'thead', 'th')
+            self._process_section(match, tb_idx, 'tbody', 'td')
+            self._process_section(match, tb_idx, 'tfoot', 'td')
 
         return self.result
 
@@ -89,7 +56,6 @@ class ReParser():
             # Find rows
             row_matches = re.findall(r'<tr.*?>(.*?)</tr>', s_content, re.DOTALL)
             for tr_idx, tr_content in enumerate(row_matches):
-                # Unique key for rows (shared logic for body and foot)
                 self.result[f"tr_{tb_idx}_{tr_idx}"] = tr_content.strip()
 
                 # Find cells
@@ -110,7 +76,7 @@ if __name__ == '__main__':
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
     print(re_result.keys())
-    #print(re_result['thead_1_1'])
+    print(re_result['th_0_0_1'])
 
 
     # Save raw_data to a file next to this script
