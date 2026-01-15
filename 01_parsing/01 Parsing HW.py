@@ -25,8 +25,8 @@ def mock_fetch_url(url):
 
 
 class ReParser():
-    def __init__(self, raw_data = None):
-        self.raw_data = raw_data or ""
+    def __init__(self, raw_data = ""):
+        self.raw_data = raw_data
 
         self.result = defaultdict(str)
 
@@ -40,14 +40,27 @@ class ReParser():
         return self.result
 
     def _parse_table(self):
-        pass
+        table_pattern = r'<table.*?>.*?</table>'
+        tables = re.findall(table_pattern, self.raw_data, re.DOTALL)
+        for i, table in enumerate(tables, start=1):
+            key = f"table_{i}"
+            self.result[key] = table
 
     def _parse_meta(self):
-        pass
+        tags = ["thead", "tbody","tfoot","tr", "th", "td"]
+        formatted_tags = [rf'<{tag}.*?>.*?</{tag}>' for tag in tags]
+        for ft in formatted_tags:
+            parsed_tags = re.findall(ft, self.raw_data , re.DOTALL)
+
+        for i, p_tag in enumerate(parsed_tags, start=1):
+            key = self.find_key_for_tag(p_tag)
+            self.result[key] = p_tag
 
     def _parse_table_content(self):
         pass
 
+    def find_key_for_tag(self, tag_str):
+        return tag_str[:10]
 
 
 
@@ -63,7 +76,8 @@ if __name__ == '__main__':
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
     print("ReParser Result:")
-    print(re_result)
+    print(re_result.keys())  # Print first 500 characters of the first table
+
 
     # Save raw_data to a file next to this script
     # try:
