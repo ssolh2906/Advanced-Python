@@ -14,7 +14,7 @@ def fetch_url(url):
     return html_text
 
 
-class ReParser():
+class ReParser:
     def __init__(self, raw_data=""):
         self.raw_data = raw_data
 
@@ -74,16 +74,16 @@ class Bs4Parser:
             for section_tag in ['thead', 'tbody', 'tfoot']:
                 section = table.find(section_tag)
                 if section:
-                    self.result[f"{section_tag}_{tb_idx}"] = str(section.text)
+                    self.result[f"{section_tag}_{tb_idx}"] = str(section.text.strip())
 
                     # Find rows
                     rows = section.find_all('tr')
                     for tr_idx, row in enumerate(rows):
-                        self.result[f"tr_{tb_idx}_{tr_idx}"] = str(row.text)
+                        self.result[f"tr_{tb_idx}_{tr_idx}"] = str(row.text.strip())
                         # Find cells
                         cells = row.find_all(['th', 'td'])
                         for td_idx, cell in enumerate(cells):
-                            self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text)
+                            self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
 
         return self.result
 
