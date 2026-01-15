@@ -34,34 +34,29 @@ class ReParser():
         if not self.raw_data:
             raise Exception("No data")
 
-        self._parse_table()
-        self._parse_meta()
-        self._parse_table_content()
-        return self.result
-
-    def _parse_table(self):
         table_pattern = r'<table.*?>.*?</table>'
-        tables = re.findall(table_pattern, self.raw_data, re.DOTALL)
-        for i, table in enumerate(tables, start=1):
-            key = f"table_{i}"
-            self.result[key] = table
+        table_matches = re.findall(table_pattern, self.raw_data, re.DOTALL)
+        for tb_idx, match in enumerate(table_matches, start=1):
+            # Add table match to result dict
+            self.result[f"table_{tb_idx}"] = match
+            # Search inside table
 
-    def _parse_meta(self):
-        tags = ["thead", "tbody","tfoot","tr", "th", "td"]
-        formatted_tags = [rf'<{tag}.*?>.*?</{tag}>' for tag in tags]
-        for ft in formatted_tags:
-            parsed_tags = re.findall(ft, self.raw_data , re.DOTALL)
-            for i, p_tag in enumerate(parsed_tags, start=1):
-                key = self.find_key_for_tag(p_tag)
-                self.result[key] = p_tag
+            header_pattern = r'<thead>(.*?)</thead>'
+            h_matches = re.findall(header_pattern, match, re.DOTALL)
+            for h_idx, h_match in enumerate(h_matches, start=1):
+                self.result[f"thead_{tb_idx}_{h_idx}"] = h_match.strip()
 
-    def _parse_table_content(self):
-        pass
+            body_pattern = r'<tbody.*?>(.*?)</tbody>'
+            b_matches = re.findall(body_pattern, match, re.DOTALL)
+            for b_idx, b_match in enumerate(b_matches, start=1):
+                self.result[f"tbody_{tb_idx}_{b_idx}"] = b_match.strip()
 
-    def find_key_for_tag(self, tag_str):
-        return tag_str[:10]
+            foot_pattern = r'<tfoot.*?>(.*?)</tfoot>'
+            f_matches = re.findall(foot_pattern, match, re.DOTALL)
+            for f_idx, f_match in enumerate(f_matches, start=1):
+                self.result[f"tfoot_{tb_idx}_{f_idx}"] = f_match.strip()
 
-
+        return self.result
 
 class Bs4Parser:
     pass
@@ -74,11 +69,7 @@ if __name__ == '__main__':
 
     re_parser = ReParser(raw_data)
     re_result = re_parser.parse()
-    print("ReParser Result:")
-    keys = list(re_result.keys())
-
-    for key in keys[3:7]:
-        print(re_result[key])
+    print(re_result.keys())
 
 
     # Save raw_data to a file next to this script
