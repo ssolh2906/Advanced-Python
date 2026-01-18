@@ -1,16 +1,19 @@
 
-
-class BS4(url):
-    def __init__(self):
+class BS4Parser:
+    def __init__(self, url):
         self.url=url
         #validate URL
-        if _valid_url(url):
-            #raise invalid URL error
+        if self._valid_url(self.url):
+            # raise invalid URL error
+            pass
         # fetch HTML
-        html = _fetch_html(url)
+        html = self._fetch_html(url)
         #initialize soup object
-        #self.soup = 
+        #self.soup = BS4() #Store references to any external data source, Such as BS4 class instance
         pass
+
+    def _valid_url(self,url):
+        return True
         
     def __len__(self): #number of rows
         pass
@@ -42,7 +45,7 @@ class BS4(url):
 class Parsed_table:
     #table:dict
     
-    def table(self)
+    def table(self):
         pass
         
     def row(self, row_index):
@@ -54,6 +57,7 @@ class Parsed_table:
         return True
         
     def cell(self, row_index, col_index):
+        # Handle missing table elements exception with default dictionaries
         pass
     
     #cell index validation
@@ -78,6 +82,8 @@ class Parsed_table:
 #inconsistent column length
 #failed network request
 
+if __name__ == '__main__':
+    BS4_Parser = BS4Parser("https://example.com/table_page")
     
     
     
