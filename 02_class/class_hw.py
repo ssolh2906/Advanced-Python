@@ -1,8 +1,11 @@
 from collections import defaultdict
 from typing import DefaultDict, Any
 
-from bs4 import BeautifulSoup
+import requests
+from bs4 import BeautifulSoup, ResultSet, Tag
 from collections import namedtuple
+
+from requests import HTTPError
 
 # Define color variables
 red = '\033[1;91m'
@@ -49,22 +52,26 @@ class BS4:
 
     def __init__(self, url):
         # Properties
+        self.soup: BeautifulSoup = None
         self.url = url
         self.result = defaultdict(str)
         self.html = ""
 
     def parse(self):
         # validate URL
-        if self._valid_url(self.url):
-            # raise invalid URL error
-            pass
+        if not self._valid_url(self.url):
+            raise Exception('Invalid URL\nMake sure the URL is correct.\nURL: {url}')
+
         # fetch HTML
         self._fetch_html(self.url)
         # initialize soup object
         self.soup = BeautifulSoup(self.html,
                                   "html.parser")  # Store references to any external data source, Such as BS4 class instance
-
         tables = self.soup.find_all('table')
+        self._parse_tables(tables)
+        return self.result
+
+    def _parse_tables(self, tables: ResultSet[Tag]):
         for tb_idx, table in enumerate(tables):
             self.result[f"table_{tb_idx}"] = str(table)
 
@@ -82,17 +89,29 @@ class BS4:
                         cells = row.find_all(['th', 'td'])
                         for td_idx, cell in enumerate(cells):
                             self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
-        pass
-        return self.result
 
     def _valid_url(self, url):
+        if not url or url == "":
+            return False
+        elif not url.startswith('http') or url.startswith('https'):
+            raise ValueError('Invalid URL\nUrl should be starting with http or https.\nURL: {url}')
         return True
 
     def _fetch_html(self, url):
-        # network error handling
-        # invalid response
-        # missing contents
-        self.html = result
+        try:
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(url, headers=headers)
+            html_text = response.text
+            self.html = html_text
+
+            if not response.text.strip():
+                raise ValueError("Value error: Empty HTML content.\nMake sure the URL is correct.\nURL: {url}")
+        except ConnectionError:
+            raise Exception("Network error: Failed to connect to the URL.\nMake sure the URL is correct.\nURL: {url}")
+        except HTTPError as e:
+            raise Exception(f"HTTP error: {e.response.status_code}\nMake sure the URL is correct.\nURL: {url}")
+        except Exception as e:
+            raise Exception(f"Failed to fetch URL: {e}\nMake sure the URL is correct.\nURL: {url}")
 
 
 class IndexedTable:
@@ -146,17 +165,18 @@ class IndexedTable:
                         cell_key = f"{cell.name}_{self.tb_idx}_{tr_idx}_{td_idx}"
                         self.indexed_table[cell_key] = str(cell)
                         self.indexed_cells[row_key][cell_key] = str(cell)
-                        pass
+
 
     # Accessors
     def table(self):
-        pass
+        return self.indexed_table
 
     def row(self, row_index):
-        pass
+        return self.indexed_rows[row_index]
 
     def _valid_row_index(self, row_index):
         # raise error
+
         return True
 
     def cell(self, row_index, col_index):
