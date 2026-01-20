@@ -52,10 +52,16 @@ class BS4:
 
     def __init__(self, url):
         # Properties
-        self.soup: BeautifulSoup = None
         self.url = url
-        self.result = defaultdict(str)
         self.html = ""
+        self.soup = self.parse()
+        self.result = defaultdict()
+
+        if self.soup:
+            tables = self.soup.find_all('table')
+            for tb_idx, table in enumerate(tables):
+                self.result[f'table_{tb_idx}'] = str(table)
+
 
     def parse(self):
         # validate URL
@@ -65,30 +71,9 @@ class BS4:
         # fetch HTML
         self._fetch_html(self.url)
         # initialize soup object
-        self.soup = BeautifulSoup(self.html,
+        result =  BeautifulSoup(self.html,
                                   "html.parser")  # Store references to any external data source, Such as BS4 class instance
-        tables = self.soup.find_all('table')
-        self._parse_tables(tables)
-        return self.result
-
-    def _parse_tables(self, tables: ResultSet[Tag]):
-        for tb_idx, table in enumerate(tables):
-            self.result[f"table_{tb_idx}"] = str(table)
-
-            # Process thead, tbody, tfoot
-            for section_tag in ['thead', 'tbody', 'tfoot']:
-                section = table.find(section_tag)
-                if section:
-                    self.result[f"{section_tag}_{tb_idx}"] = str(section.text.strip())
-
-                    # Find rows
-                    rows = section.find_all('tr')
-                    for tr_idx, row in enumerate(rows):
-                        self.result[f"tr_{tb_idx}_{tr_idx}"] = str(row.text.strip())
-                        # Find cells
-                        cells = row.find_all(['th', 'td'])
-                        for td_idx, cell in enumerate(cells):
-                            self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
+        return result
 
     def _valid_url(self, url):
         if not url or url == "":
@@ -201,6 +186,24 @@ class IndexedTable:
 
     pass
 
+    def _parse_tables(self, tables: ResultSet[Tag]):
+        for tb_idx, table in enumerate(tables):
+            self.result[f"table_{tb_idx}"] = str(table)
+
+            # Process thead, tbody, tfoot
+            for section_tag in ['thead', 'tbody', 'tfoot']:
+                section = table.find(section_tag)
+                if section:
+                    self.result[f"{section_tag}_{tb_idx}"] = str(section.text.strip())
+
+                    # Find rows
+                    rows = section.find_all('tr')
+                    for tr_idx, row in enumerate(rows):
+                        self.result[f"tr_{tb_idx}_{tr_idx}"] = str(row.text.strip())
+                        # Find cells
+                        cells = row.find_all(['th', 'td'])
+                        for td_idx, cell in enumerate(cells):
+                            self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
 
 # error class out of range index
 # missing table elements error
