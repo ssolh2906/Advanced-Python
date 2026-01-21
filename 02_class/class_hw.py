@@ -1,5 +1,4 @@
 from collections import defaultdict
-from typing import DefaultDict, Any, Tuple
 
 import requests
 from bs4 import BeautifulSoup, ResultSet, Tag
@@ -51,6 +50,10 @@ class BS4:
     """
 
     def __init__(self, url):
+        """
+        Fetch, parse, and instantiate IndexedTable objects.
+        :param url:
+        """
         # Properties
         self.url = url
         self.html = ""
@@ -169,7 +172,7 @@ class IndexedTable:
                     for td_idx, cell in enumerate(cells):
                         cell_key = f"{cell.name}_{self.tb_idx}_{tr_idx}_{td_idx}"
                         self.result[cell_key] = str(cell)
-                        if cell.name == 'th':
+                        if cell.name == 'th' or section_tag == 'thead':
                             self.headers.append(cell.text.strip())
                         curr_cell_list.append(cell.text.strip())
                     self.row_data.append(curr_cell_list)
@@ -255,18 +258,48 @@ class IndexedTable:
                         for td_idx, cell in enumerate(cells):
                             self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
 
-# error class out of range index
-# missing table elements error
-# malformed raw or cells
-# inconsistent column length
-# failed network request
 
 if __name__ == '__main__':
-    # Parse tables using BS4
-    bs4_parser = BS4("https://example.com/table_page")
-    parsed_tables = bs4_parser.parse()
 
-    # Index parsed tables
-    tables_dd = defaultdict()
-    for table_idx, table in parsed_tables:
-        tables_dd[f'table_{table_idx}'] = IndexedTable(table)
+    target_url = "https://www.worldometers.info/world-population/population-by-country/"
+    print(f"{pallette.cyan}Strat fetching URL")
+
+    try:
+        bs4 = BS4(target_url)
+        print(f"{pallette.cyan}{len(bs4.tables)} table found.{white}")
+        print(f"{pallette.cyan}Using table_0 for the tests.")
+        print("Parsing")
+        table0 = bs4.tables['table_0']
+
+        print(f"{pallette.green}Success: No. of rows {len(table0)} {white}\n")
+
+        # Test dunders
+        print(f"{pallette.yellow}[Test 1] Dunder {white}")
+        print(f"__repr__:\n {repr(table0)}")
+        print(f"__str__:\n{table0}")
+        print(f"__len__: {len(table0)} rows")
+
+        # Test Accessors
+        country_name = table0.cell(1, 1)
+        population = table0.cell(1, 2)
+        print(f"Country name: {country_name}, Population: {population}")
+
+        print(f"3rd column header: {table0.column_header(2)}")
+
+        # Test Error Handling
+        print(f"\n{pallette.yellow}[Test 3] Error Handling {white}")
+        try:
+            print("Causing error, row index 9999")
+            table0.row(9999)
+        except IndexError as e:
+            print(f"{pallette.red}Caught expected error: {e}{white}")
+
+        # Test Iteration
+        print(f"\n{pallette.yellow}[Test 4] Iteration{white}")
+        for i, row_list in enumerate(table0):
+            if i >= 5:
+                break
+            print(f"{row_list[1]} ({row_list[2]})")
+
+    except Exception as e:
+        print(f"{pallette.red}Unexpected error. {e}{white}")
