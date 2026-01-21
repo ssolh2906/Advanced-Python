@@ -271,7 +271,7 @@ class TKinterDisplay:
         if indexed_table is None:
             raise ValueError("IndexedTable instance is required to initialize TKinterDisplay.")
         self.indexed_table = indexed_table
-        self.header, *self.table_content = self.indexed_table # First row is header
+        self.header, *self.table_content = self.indexed_table  # First row is header
         self.root = tk.Tk()
         self.listbox = None
         self.label = None
@@ -298,7 +298,6 @@ class TKinterDisplay:
         self.root.geometry("350x400")
         self._list_box_widget()
         self._label_widget()
-        self.root.resizable(False, False)
 
     def _list_box_widget(self):
         """
@@ -315,14 +314,22 @@ class TKinterDisplay:
         for row in self.table_content:
             country_name = row[idx_county_name]
             self.listbox.insert(tk.END, country_name)
+
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
 
     def _on_listbox_select(self, event):
-        item_idx = self._extract_selected_listbox_idex()
+        item_idx = self._extract_selected_listbox_idx()
         if item_idx is not None:
             self._update_population_label(item_idx)
         else:
             self._update_population_label_error()
+
+    def _extract_selected_listbox_idx(self):
+        """
+        Safely extract the selected index from the Listbox
+        """
+        cs = self.listbox.curselection()
+        return cs[0] if cs else None
 
     def _label_widget(self):
         """
@@ -345,13 +352,6 @@ class TKinterDisplay:
 
     def _update_population_label_error(self):
         self.label.config(text="Error: No selection")
-
-    def _extract_selected_listbox_idex(self):
-        """
-        Safely extract the selected index from the Listbox
-        """
-        cs = self.listbox.curselection()
-        return cs[0] if cs else None
 
 
 if __name__ == '__main__':
