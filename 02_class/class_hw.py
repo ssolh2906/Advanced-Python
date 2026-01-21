@@ -259,6 +259,60 @@ class IndexedTable:
                             self.result[f"{cell.name}_{tb_idx}_{tr_idx}_{td_idx}"] = str(cell.text.strip())
 
 
+class TKinterDisplay:
+    """
+    TKinter GUI display class for HTML table data.
+    encapsulate all GUI construction, widget configuration, event binding, and update logic.
+    """
+
+    def __init__(self, indexed_table: IndexedTable):
+        self.indexed_table = indexed_table
+        self.main_window()
+
+    def run(self):
+        """
+        start the TKinter main event loop
+        """
+        pass
+
+    def _main_window(self):
+        """
+        create the root window
+        set the window title
+        configure layout (grid or pack)
+        store references to any external data sources (e.g., the BS4 class instance)
+        """
+        pass
+
+    def _list_box_widget(self):
+        """
+        populate the Listbox with country names provided by the BS4 class
+        ensure the Listbox supports single‑selection mode
+        configure scrolling if the list exceeds the window height
+        store the Listbox as an instance attribute for later access
+        """
+        pass
+
+    def _label_widget(self):
+        """
+        initialize the Label with a placeholder value (e.g., “Select a country”)
+        update the Label dynamically when a selection occurs
+        ensure the Label is readable and positioned clearly in the layout
+        """
+        pass
+
+    def _update_population_label(self,):
+        pass
+
+    def _extract_selected_listbox_idex(self):
+        """
+        Safely extract the selected index from the Listbox
+        """
+        pass
+
+
+
+
 if __name__ == '__main__':
 
     target_url = "https://www.worldometers.info/world-population/population-by-country/"
