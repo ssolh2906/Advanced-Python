@@ -293,10 +293,11 @@ class TKinterDisplay:
         configure layout (grid or pack)
         store references to any external data sources (e.g., the BS4 class instance)
         """
-        self.root.title("TKinter GUI TITLE")
-        self.root.geometry("400x400")
+        self.root.title("Country Population Viewer")
+        self.root.geometry("350x400")
         self._list_box_widget()
         self._label_widget()
+        self.root.resizable(False, False)
 
     def _list_box_widget(self):
         """
@@ -308,7 +309,7 @@ class TKinterDisplay:
         idx_county_name = 1
 
         self.listbox = tk.Listbox(self.root, selectmode=tk.SINGLE)
-        self.listbox.pack(padx=default_pad)
+        self.listbox.pack(padx=default_pad, pady=default_pad, fill=tk.BOTH, expand=True)
 
         for row in self.indexed_table:
             country_name = row[idx_county_name]
@@ -329,11 +330,12 @@ class TKinterDisplay:
         ensure the Label is readable and positioned clearly in the layout
         """
         self.label = tk.Label(self.root, text="Select a country")
-        self.label.pack()
+        self.label.pack(padx=default_pad, pady=default_pad)
 
     def _update_population_label(self, item_idx):
         idx_county_population = 2
-        text = self.indexed_table[item_idx][idx_county_population]
+        pop = self.indexed_table[item_idx][idx_county_population]
+        text = f"Population: {pop}"
         self.label.config(text=text)
 
     def _update_population_label_error(self):
