@@ -270,7 +270,8 @@ class TKinterDisplay:
     def __init__(self, indexed_table: IndexedTable):
         if indexed_table is None:
             raise ValueError("IndexedTable instance is required to initialize TKinterDisplay.")
-        self.header, *self.indexed_table = indexed_table # First row is header
+        self.indexed_table = indexed_table
+        self.header, *self.table_content = self.indexed_table # First row is header
         self.root = tk.Tk()
         self.listbox = None
         self.label = None
@@ -311,7 +312,7 @@ class TKinterDisplay:
         self.listbox = tk.Listbox(self.root, selectmode=tk.SINGLE)
         self.listbox.pack(padx=default_pad, pady=default_pad, fill=tk.BOTH, expand=True)
 
-        for row in self.indexed_table:
+        for row in self.table_content:
             country_name = row[idx_county_name]
             self.listbox.insert(tk.END, country_name)
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
@@ -333,10 +334,14 @@ class TKinterDisplay:
         self.label.pack(padx=default_pad, pady=default_pad)
 
     def _update_population_label(self, item_idx):
-        idx_county_population = 2
-        pop = self.indexed_table[item_idx][idx_county_population]
-        text = f"Population: {pop}"
+        text = self._get_label_pop_text(item_idx)
         self.label.config(text=text)
+
+    def _get_label_pop_text(self, item_idx):
+        idx_county_population = 2
+        pop = self.table_content[item_idx][idx_county_population]
+        text = f"Population: {pop}"
+        return text
 
     def _update_population_label_error(self):
         self.label.config(text="Error: No selection")
