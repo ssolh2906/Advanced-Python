@@ -270,9 +270,10 @@ class TKinterDisplay:
     def __init__(self, indexed_table: IndexedTable):
         if indexed_table is None:
             raise ValueError("IndexedTable instance is required to initialize TKinterDisplay.")
-        self.indexed_table = indexed_table
+        self.header, *self.indexed_table = indexed_table # First row is header
         self.root = tk.Tk()
-
+        self.listbox = None
+        self.label = None
 
     def run(self):
         """
@@ -292,17 +293,10 @@ class TKinterDisplay:
         configure layout (grid or pack)
         store references to any external data sources (e.g., the BS4 class instance)
         """
-
-
-
         self.root.title("TKinter GUI TITLE")
         self.root.geometry("400x400")
         self._list_box_widget()
-        button = tk.Button(self.root, text="Start", command=self._some_event)
-        button.pack()
-
-    def _some_event(self):
-            print("Event triggered")
+        self._label_widget()
 
     def _list_box_widget(self):
         """
@@ -313,16 +307,20 @@ class TKinterDisplay:
         """
         idx_county_name = 1
 
-        listbox = tk.Listbox(self.root)
-        listbox.pack(padx=default_pad)
+        self.listbox = tk.Listbox(self.root, selectmode=tk.SINGLE)
+        self.listbox.pack(padx=default_pad)
+
         for row in self.indexed_table:
             country_name = row[idx_county_name]
-            listbox.insert(tk.END, country_name)
-        listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
+            self.listbox.insert(tk.END, country_name)
+        self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
 
     def _on_listbox_select(self, event):
-        print("Event triggered")
-
+        item_idx = self._extract_selected_listbox_idex()
+        if item_idx is not None:
+            self._update_population_label(item_idx)
+        else:
+            self._update_population_label_error()
 
     def _label_widget(self):
         """
@@ -330,16 +328,23 @@ class TKinterDisplay:
         update the Label dynamically when a selection occurs
         ensure the Label is readable and positioned clearly in the layout
         """
-        pass
+        self.label = tk.Label(self.root, text="Select a country")
+        self.label.pack()
 
-    def _update_population_label(self, ):
-        pass
+    def _update_population_label(self, item_idx):
+        idx_county_population = 2
+        text = self.indexed_table[item_idx][idx_county_population]
+        self.label.config(text=text)
+
+    def _update_population_label_error(self):
+        self.label.config(text="Error: No selection")
 
     def _extract_selected_listbox_idex(self):
         """
         Safely extract the selected index from the Listbox
         """
-        pass
+        cs = self.listbox.curselection()
+        return cs[0] if cs else None
 
 
 if __name__ == '__main__':
