@@ -1,10 +1,12 @@
 from collections import defaultdict
-
+import tkinter as tk
 import requests
 from bs4 import BeautifulSoup, ResultSet, Tag
 from collections import namedtuple
 
 from requests import HTTPError
+
+default_pad = 10
 
 # Define color variables
 red = '\033[1;91m'
@@ -266,14 +268,22 @@ class TKinterDisplay:
     """
 
     def __init__(self, indexed_table: IndexedTable):
+        if indexed_table is None:
+            raise ValueError("IndexedTable instance is required to initialize TKinterDisplay.")
         self.indexed_table = indexed_table
-        self.main_window()
+        self.root = tk.Tk()
+
 
     def run(self):
         """
         start the TKinter main event loop
         """
-        pass
+        try:
+            self._main_window()
+            self.root.mainloop()
+        except Exception as e:
+            print(f"Error initializing main window: {e}")
+            return
 
     def _main_window(self):
         """
@@ -282,7 +292,17 @@ class TKinterDisplay:
         configure layout (grid or pack)
         store references to any external data sources (e.g., the BS4 class instance)
         """
-        pass
+
+
+
+        self.root.title("TKinter GUI TITLE")
+        self.root.geometry("400x400")
+        self._list_box_widget()
+        button = tk.Button(self.root, text="Start", command=self._some_event)
+        button.pack()
+
+    def _some_event(self):
+            print("Event triggered")
 
     def _list_box_widget(self):
         """
@@ -291,7 +311,18 @@ class TKinterDisplay:
         configure scrolling if the list exceeds the window height
         store the Listbox as an instance attribute for later access
         """
-        pass
+        idx_county_name = 1
+
+        listbox = tk.Listbox(self.root)
+        listbox.pack(padx=default_pad)
+        for row in self.indexed_table:
+            country_name = row[idx_county_name]
+            listbox.insert(tk.END, country_name)
+        listbox.bind("<<ListboxSelect>>", self._on_listbox_select)
+
+    def _on_listbox_select(self, event):
+        print("Event triggered")
+
 
     def _label_widget(self):
         """
@@ -301,7 +332,7 @@ class TKinterDisplay:
         """
         pass
 
-    def _update_population_label(self,):
+    def _update_population_label(self, ):
         pass
 
     def _extract_selected_listbox_idex(self):
@@ -309,8 +340,6 @@ class TKinterDisplay:
         Safely extract the selected index from the Listbox
         """
         pass
-
-
 
 
 if __name__ == '__main__':
@@ -357,3 +386,5 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(f"{pallette.red}Unexpected error. {e}{white}")
+
+    TKinterDisplay(table0).run()
