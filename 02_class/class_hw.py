@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import DefaultDict, Any
+from typing import DefaultDict, Any, Tuple
 
 import requests
 from bs4 import BeautifulSoup, ResultSet, Tag
@@ -54,14 +54,20 @@ class BS4:
         # Properties
         self.url = url
         self.html = ""
-        self.soup = self.parse()
+
+        # Save all tables, tags
         self.result = defaultdict()
+
+        # Save each table as IndexedTable instance
+        self.tables = defaultdict()
+
+        self.soup = self.parse()
 
         if self.soup:
             tables = self.soup.find_all('table')
             for tb_idx, table in enumerate(tables):
                 self.result[f'table_{tb_idx}'] = str(table)
-
+                self.tables[f'table_{tb_idx}'] = IndexedTable(table, tb_idx)
 
     def parse(self):
         # validate URL
@@ -71,14 +77,14 @@ class BS4:
         # fetch HTML
         self._fetch_html(self.url)
         # initialize soup object
-        result =  BeautifulSoup(self.html,
-                                  "html.parser")  # Store references to any external data source, Such as BS4 class instance
+        result = BeautifulSoup(self.html, "html.parser")
+        # Store references to any external data source, Such as BS4 class instance
         return result
 
     def _valid_url(self, url):
         if not url or url == "":
             return False
-        elif not url.startswith('http') or url.startswith('https'):
+        elif not (url.startswith('http') or url.startswith('https')):
             raise ValueError('Invalid URL\nUrl should be starting with http or https.\nURL: {url}')
         return True
 
@@ -91,7 +97,7 @@ class BS4:
 
             if not response.text.strip():
                 raise ValueError("Value error: Empty HTML content.\nMake sure the URL is correct.\nURL: {url}")
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             raise Exception("Network error: Failed to connect to the URL.\nMake sure the URL is correct.\nURL: {url}")
         except HTTPError as e:
             raise Exception(f"HTTP error: {e.response.status_code}\nMake sure the URL is correct.\nURL: {url}")
@@ -100,91 +106,135 @@ class BS4:
 
 
 class IndexedTable:
+    """
+    Structured table storage
+    """
+
     def __init__(self, parsed_table, tb_idx: int):
         # Init properties
         self.tb_idx = tb_idx
-        self.indexed_table: DefaultDict[str, Any] = defaultdict(list)
-        self.indexed_rows: DefaultDict[str, Any] = defaultdict(list)
-        self.indexed_cells: DefaultDict[str, DefaultDict] = defaultdict()
+        self.result = defaultdict(str)  # Flat table data storage
+        self.row_data = []  # 2D list of rows and cells
+        self.headers = []  # th, td headers
+        self.shape = [0, 0]  # (rows, cols)
 
-        # Method calls
+        # Method call
         self._index_table(parsed_table)
 
     def __len__(self):  # number of rows
-        pass
+        return len(self.row_data)
 
-    def __getitem__(self):  # → row or cell access
-        pass
+    def __getitem__(self, row: int, col=None):  # → row or cell access
+        if row >= len(self):
+            raise IndexError("Row index out of range")
+
+        if col is None:  # Row access
+            return self.row_data[row]
+
+        else:  # Cell[row, col] access
+            if row >= len(self):
+                raise IndexError("Row index out of range.\nMaximum rows: {len(self)}")
+            if col >= len(self.row_data[row]):
+                raise IndexError("Column index out of range.\nData dimensions: {self.shape}")
+            return self.row_data[row][col]
 
     def __iter__(self):
-        # → iterate over rows
-        pass
+        return iter(self.row_data)
 
     def __repr__(self):
-        pass
+        return self._structural_summary()
 
     def __str__(self):
-        # → concise structural summary
-        pass
+        return self._structural_summary()
 
     def _index_table(self, parsed_table):
-    # store the results in an internal structure suitable for indexed access.
-    # extract all child tags (thead, tbody, tr, th, td), and store the results in an internal structure suitable for indexed access.
-    # Process thead, tbody, tfoot
+        # store the results in an internal structure suitable for indexed access.
+        # extract all child tags (thead, tbody, tr, th, td), and store the results in an internal structure suitable for indexed access.
+        # Process thead, tbody, tfoot
         for section_tag in ['thead', 'tbody', 'tfoot']:
-            sections = table.findall(section_tag)
+            sections = parsed_table.find_all(section_tag)
             for s_idx, section in enumerate(sections):
-                self.indexed_table[f"{section_tag}_{self.tb_idx}"] = str(section)
+                self.result[f"{section_tag}_{self.tb_idx}_{s_idx}"] = section.text.strip()
 
                 # Find rows
                 rows = section.find_all('tr')
                 for tr_idx, row in enumerate(rows):
                     row_key = f"tr_{self.tb_idx}_{tr_idx}"
-                    self.indexed_table[row_key] = str(row)
-                    self.indexed_rows[row_key] = str(row)
+                    self.result[row_key] = row.text.strip()
 
+                    # Cells in this row
+                    curr_cell_list = list()
                     # Find cells
                     cells = row.find_all(['th', 'td'])
-                    self.indexed_cells[row_key] = defaultdict(list)
                     for td_idx, cell in enumerate(cells):
                         cell_key = f"{cell.name}_{self.tb_idx}_{tr_idx}_{td_idx}"
-                        self.indexed_table[cell_key] = str(cell)
-                        self.indexed_cells[row_key][cell_key] = str(cell)
+                        self.result[cell_key] = str(cell)
+                        if cell.name == 'th':
+                            self.headers.append(cell.text.strip())
+                        curr_cell_list.append(cell.text.strip())
+                    self.row_data.append(curr_cell_list)
 
+                    self._update_shape(col_len=len(curr_cell_list))
+            self._update_shape(row_len=len(self.row_data))
+
+    def _update_shape(self, row_len: int = 0, col_len: int = 0):
+        if row_len > self.shape[0]:
+            self.shape[0] = row_len
+        if col_len > self.shape[1]:
+            self.shape[1] = col_len
 
     # Accessors
     def table(self):
-        return self.indexed_table
+        return self.result
 
     def row(self, row_index):
-        return self.indexed_rows[row_index]
-
-    def _valid_row_index(self, row_index):
-        # raise error
-
-        return True
+        try:
+            self._valid_row_index(row_index)
+        except IndexError as e:
+            raise e
+        return self.row_data[row_index]
 
     def cell(self, row_index, col_index):
-        # Handle missing table elements exception with default dictionaries
-        pass
+        self._valid_row_index(row_index)
+        self._valid_col_index(col_index)
+        return self.row_data[row_index][col_index]
 
     # cell index validation
 
     def column_header(self, col_index):
-        pass
-
-    # column index validation
+        try:
+            self._valid_col_index(col_index)
+        except IndexError as e:
+            raise e
+        return self.headers[col_index]
 
     def row_count(self):
-        pass
+        return self.shape[0]
 
     def col_count(self):
-        pass
+        return self.shape[1]
 
     def _structural_summary(self):
-        pass
+        summary = ""
+        summary += f"Table Index: {self.tb_idx}\n"
+        summary += f"Shape: {self.shape[0]} x {self.shape[1]}"
+        return summary
 
-    pass
+    def _valid_row_index(self, row_index):
+        if row_index < 0:
+            raise IndexError("Row index should be non-negative.")
+        elif row_index >= self.shape[0]:
+            raise IndexError(f"Row index out of range. Maximum row index: {self.shape[0]}")
+        else:
+            return True
+
+    def _valid_col_index(self, col_index):
+        if col_index < 0:
+            raise IndexError("Column index should be non-negative.")
+        elif col_index >= self.shape[1]:
+            raise IndexError(f"Column index out of range. Maximum column index: {self.shape[1]}")
+        else:
+            return True
 
     def _parse_tables(self, tables: ResultSet[Tag]):
         for tb_idx, table in enumerate(tables):
