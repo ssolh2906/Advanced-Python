@@ -531,3 +531,4 @@ comprehension/Ex_Comprehensions.py
 !/02_class/TkinterEx.py
 /03_flask/jupytervenv
 .idea/
+/04_sql/jupytervenv/
