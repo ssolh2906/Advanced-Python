@@ -3,6 +3,26 @@ reverse_string(s): Reverses a given string.
 is_palindrome(s): Checks if a string is a palindrome (reads the same backward as forward. For example: "TACOCAT").
 """
 
+
+def reverse_string(s: str):
+    if s:
+        reverse = s[::-1]
+        return reverse
+    else:
+        return None
+
+
+def is_palindrome(s: str):
+    if s:
+        s_low = s.lower()
+        s_rev = reverse_string(s_low)
+        if s_low == s_rev:
+            return True
+        else:
+            return False
+    return False
+
+
 """
 Part 3: doctest
 
