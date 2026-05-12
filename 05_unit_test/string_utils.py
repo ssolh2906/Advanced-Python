@@ -5,6 +5,22 @@ is_palindrome(s): Checks if a string is a palindrome (reads the same backward as
 
 
 def reverse_string(s: str):
+    """
+    Reverses a given string.
+
+    >>> reverse_string("hello")
+    'olleh'
+    >>> reverse_string("tacocat")
+    'tacocat'
+    >>> reverse_string("")
+    ''
+    >>> reverse_string("a")
+    'a'
+    >>> reverse_string(123)
+    Traceback (most recent call last):
+        ...
+    TypeError: Input must be a string.
+    """
     if not isinstance(s, str):
         raise TypeError("Input must be a string.")
     try:
@@ -14,6 +30,19 @@ def reverse_string(s: str):
 
 
 def is_palindrome(s: str):
+    """
+    Returns True if the input string is a palindrome, returns False otherwise.
+    >>> is_palindrome("hello")
+    False
+    >>> is_palindrome("tacocat")
+    True
+    >>> is_palindrome("a")
+    True
+    >>> is_palindrome(123)
+    Traceback (most recent call last):
+        ...
+    TypeError: Input must be a string.
+    """
     if not isinstance(s, str):
         raise TypeError("Input must be a string.")
     try:
