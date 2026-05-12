@@ -14,14 +14,18 @@ def reverse_string(s: str):
 
 
 def is_palindrome(s: str):
-    if s:
+    if not isinstance(s, str):
+        raise TypeError("Input must be a string.")
+    try:
         s_low = s.lower()
         s_rev = reverse_string(s_low)
-        if s_low == s_rev:
-            return True
-        else:
-            return False
-    return False
+    except TypeError as e:
+        raise TypeError("Input must be a string.") from e
+
+    if s_low == s_rev:
+        return True
+    else:
+        return False
 
 
 """
