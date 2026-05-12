@@ -30,16 +30,22 @@ class TestStringUtils(TestCase):
 
     # Test is_palindrome function
     def test_is_palindrome_valid(self):
-        pass
+        self.assertEqual(is_palindrome("my string"), False)
+        self.assertEqual(is_palindrome("tacocat"), True)
 
     def test_is_palindrome_invalid(self):
-        pass
+        self.assertRaises(TypeError, is_palindrome, 123)
+        self.assertRaises(TypeError, is_palindrome, ["Invalide input"])
+        self.assertRaises(TypeError, is_palindrome, None)
 
     def test_is_palindrome_edge_cases(self):
-        pass
+        self.assertEqual(is_palindrome("Tacocat"), True)
+        self.assertEqual(is_palindrome(""), True)
+        self.assertEqual(is_palindrome("a"), True)
 
     def test_is_palindrome_non_string_input(self):
-        pass
+        self.assertRaises(TypeError, is_palindrome, 1)
+
 
 
 """
